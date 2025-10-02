@@ -8,62 +8,89 @@
     <style>
         :root {
             --tray-height: 80px;
+            --app-padding: 20px;
         }
 
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevents scrolling on all screen sizes */
+            overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f0f2f5;
         }
 
         #game-wrapper {
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-            gap: 20px;
             height: 100%;
             box-sizing: border-box;
-            position: relative; /* For positioning the stumped dropzone */
+            position: relative;
         }
-
+        
+        /* --- Base Layout --- */
         #game-container {
             display: flex;
-            gap: 30px;
-            justify-content: center;
             width: 100%;
             height: 100%;
+            padding: var(--app-padding);
+            box-sizing: border-box;
         }
+        
+        /* --- Desktop Layout --- */
+        @media (min-width: 851px) {
+            #game-container {
+                flex-direction: row;
+                gap: 30px;
+            }
+            #map-container {
+                flex: 1 1 auto;
+                height: 100%;
+            }
+            #sidebar {
+                display: flex;
+            }
+            #mobile-tray-container {
+                display: none;
+            }
+        }
+
+        /* --- Mobile Layout --- */
+        @media (max-width: 850px) {
+            #game-container {
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+            }
+            #map-container {
+                flex-grow: 1;
+                min-height: 0; /* Allows map to shrink */
+            }
+            #sidebar {
+                display: none;
+            }
+            #mobile-tray-container {
+                display: flex;
+            }
+        }
+
 
         #map-container {
-            width: 800px;
-            flex-shrink: 0; /* Prevents map from shrinking in desktop flex layout */
-            height: calc(100% - 40px); /* Match sidebar for consistent bottom margin */
+            display: flex;
             position: relative;
             background-color: #fff;
-            padding: 10px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        #scroll-padding-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         #map-content {
-            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            max-width: 100%;
-            max-height: 100%;
+            position: relative;
         }
 
         #map-content svg {
@@ -86,14 +113,7 @@
             cursor: crosshair;
         }
 
-        #map-container svg path.highlight {
-            fill: #f0ad4e;
-        }
-        
-        #map-container svg path.correct {
-            /* Marker class, colors handled by specific classes */
-        }
-
+        #map-container svg path.highlight { fill: #f0ad4e; }
         #map-container svg path.correct-color-1 { fill: #34d399; }
         #map-container svg path.correct-color-2 { fill: #fbbf24; }
         #map-container svg path.correct-color-3 { fill: #60a5fa; }
@@ -101,12 +121,12 @@
         #map-container svg path.correct-color-5 { fill: #a855f7; }
         #map-container svg path.correct-color-6 { fill: #14b8a6; }
 
+
         #sidebar {
-            width: 250px;
-            display: flex;
+            flex: 0 0 250px;
             flex-direction: column;
-            flex-shrink: 0;
-            height: calc(100% - 40px); /* Adjust for body padding */
+            height: 100%;
+            gap: 20px;
         }
         
         .country-label {
@@ -127,7 +147,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 20px;
         }
 
         #info-panel h2 { margin-top: 0; }
@@ -159,8 +178,11 @@
         .country-name:hover { background-color: #dee2e6; }
         .country-name.dragging { opacity: 0.5; }
 
-        #mobile-tray-container { display: none; } /* Hidden by default */
-        
+        #mobile-tray-container {
+            flex-direction: column;
+            gap: 10px;
+        }
+
         #game-over-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6); display: none;
@@ -194,7 +216,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             font-weight: bold;
             font-size: 0.9em;
-            z-index: 10;
+            z-index: 1000;
             opacity: 0;
             transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
             pointer-events: none;
@@ -209,28 +231,10 @@
             transform: translateX(-50%) scale(1.05);
         }
 
-        /* MOBILE LAYOUT */
-        @media (max-width: 850px) {
-            #game-wrapper {
-                flex-direction: column;
-                padding: 10px;
-                gap: 10px;
-            }
-            #game-container {
-                flex-direction: column;
-                gap: 10px;
-                flex-grow: 1; 
-                min-height: 0; 
-            }
-            #sidebar { display: none; }
-            #map-container { height: 100%; width: 100%; }
-            #stumped-dropzone { display: block; }
 
-            #mobile-tray-container {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-            }
+        /* --- Mobile-Specific Overrides --- */
+        @media (max-width: 850px) {
+            #stumped-dropzone { display: block; }
             #mobile-info-panel {
                 display: flex;
                 justify-content: space-around;
@@ -239,7 +243,6 @@
                 padding: 5px;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                margin-bottom: 10px;
             }
             #mobile-info-panel div { font-size: 1em; }
 
@@ -270,61 +273,43 @@
             
             #map-container {
                 overflow: scroll;
-                -webkit-overflow-scrolling: touch; 
-                display: block;
-            }
-
-            #scroll-padding-wrapper {
-                display: inline-block;
-                width: auto;
-                height: auto;
-                padding: 0;
-                transition: padding 0.3s ease-in-out;
-            }
-
-            #map-container.zoomed #scroll-padding-wrapper {
-                padding: 55vh; /* Increased padding */
             }
             
             #map-content {
-                display: inline-block;
-                width: auto;
-                height: auto;
                 transform-origin: center center;
-                transition: transform 0.3s ease-in-out;
+                transition: transform 0.3s ease-in-out, margin 0.3s ease-in-out;
             }
 
             #map-container.zoomed #map-content {
                 transform: scale(2.25);
+                margin: 55vh; /* This creates the scrollable area */
             }
 
             #map-content svg {
                 height: 100vh;
+                width: auto;
                 max-width: none;
                 max-height: none;
-                width: auto;
             }
         }
     </style>
 </head>
 <body>
     <div id="game-wrapper">
-        <!-- Mobile-only tray -->
-        <div id="mobile-tray-container">
-             <div id="mobile-info-panel">
-                <div>Score: <span id="mobile-score">0</span></div>
-                <h2>Africa Quiz</h2>
-                <div>Time: <span id="mobile-timer">0s</span></div>
-            </div>
-            <div id="mobile-country-tray"></div>
-        </div>
-
         <div id="game-container">
+            <div id="mobile-tray-container">
+                <div id="mobile-info-panel">
+                    <div>Score: <span id="mobile-score">0</span></div>
+                    <h2>Africa Quiz</h2>
+                    <div>Time: <span id="mobile-timer">0s</span></div>
+                </div>
+                <div id="mobile-country-tray"></div>
+            </div>
+
             <div id="map-container">
                 <div id="loading-indicator">Loading Map...</div>
             </div>
 
-            <!-- Desktop-only sidebar -->
             <div id="sidebar">
                 <div id="info-panel">
                     <h2>Africa Quiz</h2>
@@ -335,7 +320,6 @@
             </div>
         </div>
 
-        <!-- Dropzone for swapping countries on mobile -->
         <div id="stumped-dropzone">Try another country</div>
     </div>
 
@@ -546,11 +530,7 @@
                     const mapContent = document.createElement('div');
                     mapContent.id = 'map-content';
                     mapContent.appendChild(svgElement);
-
-                    const scrollPaddingWrapper = document.createElement('div');
-                    scrollPaddingWrapper.id = 'scroll-padding-wrapper';
-                    scrollPaddingWrapper.appendChild(mapContent);
-                    mapContainer.appendChild(scrollPaddingWrapper);
+                    mapContainer.appendChild(mapContent);
                     
                     const escapeCssSelector = (id) => id.replace(/([ \!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g, '\\$1');
 
@@ -599,7 +579,6 @@
                         const maxScrollLeft = mapContainer.scrollWidth - mapContainer.clientWidth;
                         const maxScrollTop = mapContainer.scrollHeight - mapContainer.clientHeight;
                         
-                        // When zooming in, center the view. When zooming out, do nothing.
                         if (zoomed) {
                              mapContainer.scrollTo({
                                 left: maxScrollLeft / 2,
@@ -624,13 +603,12 @@
                 }
                 
                 const stumpedRect = stumpedDropzone.getBoundingClientRect();
-                const bottomMargin = (window.innerHeight - stumpedRect.top) + 10; // dead zone below the button
+                const bottomMargin = (window.innerHeight - stumpedRect.top) + 10;
                 const activeHeight = mapRect.height - bottomMargin;
                 const maxScrollTop = mapContainer.scrollHeight - mapContainer.clientHeight;
 
                 if (maxScrollTop > 0 && activeHeight > 0) {
                     const posInContainerY = clientY - mapRect.top;
-                    // Only scroll if touch is within the active area
                     if (posInContainerY < activeHeight) {
                         const fractionY = posInContainerY / activeHeight;
                         mapContainer.scrollTop = fractionY * maxScrollTop;
@@ -750,7 +728,7 @@
                             touch.clientY <= stumpedRect.bottom
                         );
                     }
-
+                    
                     ghostEl.style.display = 'none';
                     const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
                     document.body.removeChild(ghostEl);
